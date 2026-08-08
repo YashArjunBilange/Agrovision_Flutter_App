@@ -1,12 +1,19 @@
 from io import BytesIO
 from typing import Dict
-
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, UnidentifiedImageError
 from ultralytics import YOLO
 
 import remedies
+from app.api.v1.api import api_router
+from app.core.config import settings
+from app.core.logging import LoggingMiddleware, logger
+from app.db.session import init_db
+
+# Initialize database schema
+init_db()
+
 
 ALLOWED_MIME_TYPES = {
     "image/jpeg",
@@ -15,33 +22,41 @@ ALLOWED_MIME_TYPES = {
     "image/webp",
 }
 
-CONFIDENCE_THRESHOLD = 0.0  # Set to 0.0 for now; can be raised later if needed.
-
 app = FastAPI(
-    title="AgroVision API",
-    description="FastAPI backend for YOLOv8 plant disease classification.",
-    version="1.0.0",
+    title=settings.PROJECT_NAME,
+    description=settings.DESCRIPTION,
+    version=settings.VERSION,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
+# Add structured logging middleware
+app.add_middleware(LoggingMiddleware)
+
+# Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    # TODO: For production, restrict allow_origins to the deployed Flutter Web domain.
-    # For example: allow_origins=["https://agrovision-xxxx.onrender.com"]
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True if "*" not in settings.CORS_ORIGINS else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Mount Versioned API Router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Load Legacy YOLO model for backward compatibility
 try:
-    model = YOLO("best.pt")
+    legacy_model = YOLO(settings.LEGACY_MODEL_PATH)
+    logger.info("Legacy YOLO model loaded successfully.")
 except Exception as exc:
-    raise RuntimeError("Failed to load YOLO model from best.pt") from exc
+    legacy_model = None
+    logger.warning(f"Could not load legacy model from {settings.LEGACY_MODEL_PATH}: {exc}")
 
 
 def normalize_class_name(class_name: str) -> str:
-    normalized = class_name.lower().replace("___", "_").replace(" ", "_")
-    return normalized
+    return class_name.lower().replace("___", "_").replace(" ", "_")
 
 
 def get_remedy(class_name: str) -> str:
@@ -72,34 +87,46 @@ def extract_prediction(result) -> Dict[str, object]:
     }
 
 
-@app.get("/")
+# ============================================================
+# Legacy Root & Health Endpoints (Preserved for compatibility)
+# ============================================================
+
+@app.get("/", tags=["General"])
 async def root() -> Dict[str, str]:
     return {
         "message": "Welcome to AgroVision API",
         "status": "online",
-        "version": "1.0.0",
+        "version": settings.VERSION,
+        "docs": "/docs",
+        "api_v1": f"{settings.API_V1_STR}",
     }
 
 
-@app.get("/health")
+@app.get("/health", tags=["General"])
 async def health() -> Dict[str, object]:
     return {
         "status": "healthy",
-        "model_loaded": True,
+        "model_loaded": legacy_model is not None,
+        "version": settings.VERSION,
     }
 
 
-@app.get("/model-info")
+@app.get("/model-info", tags=["General"])
 async def model_info() -> Dict[str, object]:
+    if legacy_model is None:
+        raise HTTPException(status_code=503, detail="Legacy model is not currently loaded.")
     return {
         "model_type": "YOLOv8 Classification",
-        "number_of_classes": len(model.names),
-        "classes": {str(i): name for i, name in model.names.items()},
+        "number_of_classes": len(legacy_model.names),
+        "classes": {str(i): name for i, name in legacy_model.names.items()},
     }
 
 
-@app.post("/predict")
+@app.post("/predict", tags=["General"])
 async def predict(file: UploadFile = File(...)) -> Dict[str, object]:
+    if legacy_model is None:
+        raise HTTPException(status_code=503, detail="Model not loaded.")
+
     if file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=400,
@@ -118,7 +145,7 @@ async def predict(file: UploadFile = File(...)) -> Dict[str, object]:
         raise HTTPException(status_code=400, detail="Unable to read the uploaded image.")
 
     try:
-        results = model.predict(image, verbose=False)
+        results = legacy_model.predict(image, verbose=False)
         if not results:
             raise RuntimeError("Model returned no prediction results.")
 

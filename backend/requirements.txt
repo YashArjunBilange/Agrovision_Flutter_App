@@ -7,3 +7,14 @@ python-multipart
 ultralytics
 pillow
 opencv-python-headless
+pydantic-settings
+sqlalchemy
+alembic
+passlib[bcrypt]
+bcrypt
+pyjwt
+httpx
+psycopg2-binary
+asyncpg
+pytest
+pytest-asyncio
