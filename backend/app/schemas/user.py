@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # --- Farmer Profile Schemas ---
@@ -47,7 +47,7 @@ class FarmerProfileResponse(FarmerProfileBase):
 class UserBase(BaseModel):
     full_name: str = Field(min_length=2, max_length=100)
     phone: str = Field(min_length=10, max_length=15)
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -68,7 +68,7 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
 
 
 class UserResponse(UserBase):

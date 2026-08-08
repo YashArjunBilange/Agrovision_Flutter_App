@@ -8,6 +8,7 @@ ultralytics
 pillow
 opencv-python-headless
 pydantic-settings
+email-validator
 sqlalchemy
 alembic
 passlib[bcrypt]
