@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/app.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/errors/failure.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:agrovision/l10n/generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -121,7 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      l10n.appTitle,
+                      l10n!.appTitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,

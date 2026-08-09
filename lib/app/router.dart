@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:agrovision/l10n/generated/app_localizations.dart';
 
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
@@ -17,7 +17,7 @@ import '../features/stores/presentation/stores_screen.dart';
 import '../features/crop_recommendation/presentation/recommendation_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
-import '../l10n/app_localizations.dart';
+
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -173,7 +173,7 @@ class AppShell extends StatelessWidget {
                     if (MediaQuery.of(context).size.width >= 1100) ...[
                       const SizedBox(width: 8),
                       Text(
-                        l10n.appTitle,
+                        l10n!.appTitle,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -188,27 +188,27 @@ class AppShell extends StatelessWidget {
                 NavigationRailDestination(
                   icon: const Icon(Icons.home_outlined),
                   selectedIcon: const Icon(Icons.home),
-                  label: Text(l10n.home),
+                  label: Text(l10n!.home),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.grass_outlined),
                   selectedIcon: const Icon(Icons.grass),
-                  label: Text(l10n.farm),
+                  label: Text(l10n!.farm),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.document_scanner_outlined),
                   selectedIcon: const Icon(Icons.document_scanner),
-                  label: Text(l10n.scan),
+                  label: Text(l10n!.scan),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.smart_toy_outlined),
                   selectedIcon: const Icon(Icons.smart_toy),
-                  label: Text(l10n.assistant),
+                  label: Text(l10n!.assistant),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.more_horiz_outlined),
                   selectedIcon: const Icon(Icons.more_horiz),
-                  label: Text(l10n.more),
+                  label: Text(l10n!.more),
                 ),
               ],
             ),
@@ -233,27 +233,27 @@ class AppShell extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
-            label: l10n.home,
+            label: l10n!.home,
           ),
           NavigationDestination(
             icon: const Icon(Icons.grass_outlined),
             selectedIcon: const Icon(Icons.grass),
-            label: l10n.farm,
+            label: l10n!.farm,
           ),
           NavigationDestination(
             icon: const Icon(Icons.document_scanner_outlined),
             selectedIcon: const Icon(Icons.document_scanner),
-            label: l10n.scan,
+            label: l10n!.scan,
           ),
           NavigationDestination(
             icon: const Icon(Icons.smart_toy_outlined),
             selectedIcon: const Icon(Icons.smart_toy),
-            label: l10n.assistant,
+            label: l10n!.assistant,
           ),
           NavigationDestination(
             icon: const Icon(Icons.more_horiz_outlined),
             selectedIcon: const Icon(Icons.more_horiz),
-            label: l10n.more,
+            label: l10n!.more,
           ),
         ],
       ),
