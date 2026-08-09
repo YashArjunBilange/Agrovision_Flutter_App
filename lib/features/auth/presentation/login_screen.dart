@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/app.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/errors/failure.dart';
-import '../../../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {

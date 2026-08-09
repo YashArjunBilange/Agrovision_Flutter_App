@@ -23,6 +23,14 @@ class FarmBase(BaseModel):
     is_primary: bool = False
     notes: Optional[str] = None
 
+    # New fields
+    polygon_geojson: Optional[str] = None
+    area_sqm: Optional[float] = None
+    area_hectares: Optional[float] = None
+    perimeter_meters: Optional[float] = None
+    length_meters: Optional[float] = None
+    width_meters: Optional[float] = None
+
 
 class FarmCreate(FarmBase):
     pass
@@ -47,6 +55,12 @@ class FarmUpdate(BaseModel):
     is_active: Optional[bool] = None
     is_primary: Optional[bool] = None
     notes: Optional[str] = None
+    polygon_geojson: Optional[str] = None
+    area_sqm: Optional[float] = None
+    area_hectares: Optional[float] = None
+    perimeter_meters: Optional[float] = None
+    length_meters: Optional[float] = None
+    width_meters: Optional[float] = None
 
 
 class FarmResponse(FarmBase):

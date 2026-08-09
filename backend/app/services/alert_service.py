@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from sqlalchemy.orm import Session
 
-from app.models.crop_cycle import CropCycle, CropTask
+from app.models.crop_cycle import CropCycle
 from app.models.farm import Farm
 from app.models.user import User
+from app.services.crop_lifecycle_knowledge import get_current_stage
 
 
 class AlertService:
@@ -17,52 +18,24 @@ class AlertService:
     ) -> List[Dict[str, Any]]:
         alerts = []
         now_str = datetime.utcnow().isoformat()
-
-        # 1. Weather & High Humidity Fungal Alert
+        
+        if not db:
+            return alerts
+            
+        # 1. Fetch Active Crop Cycle
+        query = db.query(CropCycle).filter(CropCycle.user_id == user.id, CropCycle.status == "active")
+        if farm_id:
+            query = query.filter(CropCycle.farm_id == farm_id)
+        else:
+            primary_farm = db.query(Farm).filter(Farm.user_id == user.id, Farm.is_active == True).first()
+            if primary_farm:
+                query = query.filter(CropCycle.farm_id == primary_farm.id)
+                
+        active_cycle = query.order_by(CropCycle.id.desc()).first()
+        
+        # Base Alerts (Always applicable)
         alerts.append({
             "id": 1,
-            "title_en": "Fungal Blight Risk Warning 🍄",
-            "title_mr": "करपा रोगाचा संभाव्य इशारा 🍄",
-            "message_en": "Cloudy weather and high humidity (>80%) favor Northern Corn Leaf Blight. Check lower leaves for cigar-shaped lesions.",
-            "message_mr": "ढगाळ हवामान व जास्त आर्द्रतेमुळे मका पिकावर करपा रोगाचा प्रादुर्भाव संभवतो. पानांची पाहणी करून मँकोझेब किंवा अझॉक्सीस्ट्रोबिन फवारणीची पूर्वतयारी ठेवा.",
-            "type": "weather",
-            "severity": "high",
-            "action_route": "/more/weather",
-            "is_read": False,
-            "created_at": now_str,
-        })
-
-        # 2. FAW Pest Surveillance Advisory
-        alerts.append({
-            "id": 2,
-            "title_en": "Fall Armyworm (FAW) Vigilance 🐛",
-            "title_mr": "लष्करी अळी (FAW) सावधगिरी सल्ला 🐛",
-            "message_en": "Maize vegetative whorl stage is highly vulnerable to FAW larvae. Look for pinholes and sawdust-like frass.",
-            "message_mr": "मका पोंग्यात बारीक छिद्रे किंवा भुसा दिसल्यास तात्काळ कोराजेन (०.४ मिली/लीटर) किंवा इमामेक्टिन बेन्झोएट (०.५ ग्रॅ/लीटर) फवारणी करा.",
-            "type": "advisory",
-            "severity": "high",
-            "action_route": "/scan",
-            "is_read": False,
-            "created_at": now_str,
-        })
-
-        # 3. Fertilizer Top-Dressing Reminder
-        alerts.append({
-            "id": 3,
-            "title_en": "Nitrogen Top-Dressing Reminder 🌱",
-            "title_mr": "युरिया खताची दुसरी मात्रा (Top Dressing) 🌱",
-            "message_en": "At 30-35 days after sowing (V6-V8 stage), apply second split dose of Urea (50 kg/acre) before irrigation.",
-            "message_mr": "पेरणीनंतर ३०-३५ दिवसांनी मक्याला युरिया ५० किलो प्रति एकर या प्रमाणात मातीची ओल असताना द्या.",
-            "type": "task",
-            "severity": "medium",
-            "action_route": "/more/lifecycle",
-            "is_read": False,
-            "created_at": now_str,
-        })
-
-        # 4. Agri Store Stock & Input Support
-        alerts.append({
-            "id": 4,
             "title_en": "Fertilizer & Pesticide Availability 🏪",
             "title_mr": "कृषी सेवा केंद्र खत उपलब्ध माहिती 🏪",
             "message_en": "Find verified Krishi Seva Kendras near your farm for authorized seeds, fertilizers, and sprays.",
@@ -73,5 +46,63 @@ class AlertService:
             "is_read": False,
             "created_at": now_str,
         })
-
+        
+        if not active_cycle:
+            return alerts
+            
+        # Calculate Current Stage
+        days_since_sowing = max(0, (date.today() - active_cycle.sowing_date).days)
+        current_stage = get_current_stage(days_since_sowing)
+        
+        # 2. Stage-Aware Irrigation Alert
+        irrigation_en = current_stage.get("irrigation_advice_en")
+        irrigation_mr = current_stage.get("irrigation_advice_mr")
+        water_sens = current_stage.get("water_sensitivity", "Low")
+        
+        if irrigation_en and water_sens in ["Critical", "High"]:
+            alerts.append({
+                "id": len(alerts) + 1,
+                "title_en": f"Critical Irrigation Needed ({current_stage['name_en'].split(' -')[0]}) 💧",
+                "title_mr": f"महत्त्वाचे पाणी नियोजन ({current_stage['name_mr'].split(' -')[0]}) 💧",
+                "message_en": irrigation_en,
+                "message_mr": irrigation_mr,
+                "type": "weather",
+                "severity": "high" if water_sens == "Critical" else "medium",
+                "action_route": "/more/lifecycle",
+                "is_read": False,
+                "created_at": now_str,
+            })
+            
+        # 3. Stage-Aware Pest & Disease Watch
+        pest_watch = current_stage.get("pest_disease_watch", [])
+        for idx, pest in enumerate(pest_watch):
+            alerts.append({
+                "id": len(alerts) + 1,
+                "title_en": f"Pest Watch: {pest['threat_en']} 🐛",
+                "title_mr": f"कीड सावधगिरी: {pest['threat_mr']} 🐛",
+                "message_en": pest['action_en'],
+                "message_mr": pest['action_mr'],
+                "type": "advisory",
+                "severity": "high",
+                "action_route": "/scan",
+                "is_read": False,
+                "created_at": now_str,
+            })
+            
+        # 4. Stage-Aware NPK Recommendation
+        npk = current_stage.get("npk_recommendation")
+        if npk:
+            alerts.append({
+                "id": len(alerts) + 1,
+                "title_en": f"Fertilizer: {npk['title_en']} 🌱",
+                "title_mr": f"खत मात्रा: {npk['title_mr']} 🌱",
+                "message_en": npk['instruction_en'],
+                "message_mr": npk['instruction_mr'],
+                "type": "task",
+                "severity": "medium",
+                "action_route": "/more/lifecycle",
+                "is_read": False,
+                "created_at": now_str,
+            })
+            
         return alerts

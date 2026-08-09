@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     AI_API_KEY: str = os.getenv("AI_API_KEY", "")
     AI_MODEL: str = os.getenv("AI_MODEL", "gemini-2.5-flash")
 
+    # Sentinel-2 Satellite API
+    SENTINEL_CLIENT_ID: str = os.getenv("SENTINEL_CLIENT_ID", "")
+    SENTINEL_CLIENT_SECRET: str = os.getenv("SENTINEL_CLIENT_SECRET", "")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

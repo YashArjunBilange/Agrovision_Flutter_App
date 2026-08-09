@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     finance,
     stores,
     notifications,
+    satellite,
 )
 
 api_router = APIRouter()
@@ -17,6 +18,7 @@ api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(farms.router, prefix="/farms", tags=["Farms & Fields"])
 api_router.include_router(crops.router, prefix="/crops", tags=["Crop Lifecycle"])
+api_router.include_router(satellite.router, prefix="/satellite", tags=["Satellite Imagery"])
 api_router.include_router(disease.router, prefix="/disease", tags=["Maize Disease Detection"])
 api_router.include_router(weather.router, prefix="/weather", tags=["Weather Intelligence & Alerts"])
 api_router.include_router(assistant.router, prefix="/assistant", tags=["AI Agricultural Assistant"])

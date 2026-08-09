@@ -4,7 +4,7 @@ class AppConfig {
 
   // Base API URL for FastAPI backend
   // By default, points to the live deployed Render backend or localhost in debug
-  static const String defaultBaseUrl = 'https://agrovision-flutter-app.onrender.com';
+  static const String defaultBaseUrl = 'http://192.168.0.102:8000';
   
   static String baseUrl = defaultBaseUrl;
 

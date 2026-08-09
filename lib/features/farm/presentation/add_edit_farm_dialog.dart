@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/errors/failure.dart';
 import '../domain/farm_model.dart';
 import '../providers/farm_provider.dart';
+import 'map_polygon_picker_screen.dart';
 
 class AddEditFarmDialog extends ConsumerStatefulWidget {
   final FarmModel? farmToEdit;
@@ -45,6 +46,13 @@ class _AddEditFarmDialogState extends ConsumerState<AddEditFarmDialog> {
   late bool _isPrimary;
   bool _isLoading = false;
   String? _errorMessage;
+
+  String? _polygonGeojson;
+  double? _areaSqm;
+  double? _areaHectares;
+  double? _perimeterMeters;
+  double? _lengthMeters;
+  double? _widthMeters;
 
   final List<String> _districts = [
     'Ahmednagar', 'Akola', 'Amravati', 'Chhatrapati Sambhajinagar (Aurangabad)',
@@ -101,6 +109,13 @@ class _AddEditFarmDialogState extends ConsumerState<AddEditFarmDialog> {
     _selectedIrrigation = f?.irrigationType ?? 'Drip';
     _selectedWaterSource = f?.waterSource ?? 'Well';
     _isPrimary = f?.isPrimary ?? false;
+
+    _polygonGeojson = f?.polygonGeojson;
+    _areaSqm = f?.areaSqm;
+    _areaHectares = f?.areaHectares;
+    _perimeterMeters = f?.perimeterMeters;
+    _lengthMeters = f?.lengthMeters;
+    _widthMeters = f?.widthMeters;
   }
 
   @override
@@ -140,6 +155,12 @@ class _AddEditFarmDialogState extends ConsumerState<AddEditFarmDialog> {
       'water_source': _selectedWaterSource,
       'is_primary': _isPrimary,
       'notes': _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+      'polygon_geojson': _polygonGeojson,
+      'area_sqm': _areaSqm,
+      'area_hectares': _areaHectares,
+      'perimeter_meters': _perimeterMeters,
+      'length_meters': _lengthMeters,
+      'width_meters': _widthMeters,
     };
 
     try {
@@ -246,6 +267,54 @@ class _AddEditFarmDialogState extends ConsumerState<AddEditFarmDialog> {
                           ? (isMr ? 'कृपया शेताचे नाव टाका' : 'Please enter farm name')
                           : null,
                     ),
+                    const SizedBox(height: 14),
+
+                    // Map Polygon Picker Button
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final result = await Navigator.of(context).push<PolygonResult>(
+                          MaterialPageRoute(
+                            builder: (context) => MapPolygonPickerScreen(
+                              initialGeojson: _polygonGeojson,
+                            ),
+                          ),
+                        );
+
+                        if (result != null) {
+                          setState(() {
+                            _polygonGeojson = result.geojson;
+                            _latController.text = result.latitude.toStringAsFixed(6);
+                            _longController.text = result.longitude.toStringAsFixed(6);
+                            _acresController.text = result.areaAcres.toStringAsFixed(2);
+                            _areaSqm = result.areaSqm;
+                            _areaHectares = result.areaHectares;
+                            _perimeterMeters = result.perimeterMeters;
+                            _lengthMeters = result.lengthMeters;
+                            _widthMeters = result.widthMeters;
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.map_rounded),
+                      label: Text(
+                        _polygonGeojson != null
+                            ? (isMr ? 'नकाशावर शेत संपादित करा' : 'Edit Farm on Map')
+                            : (isMr ? 'नकाशावर शेत निवडा' : 'Draw Farm on Map'),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                    if (_polygonGeojson != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        isMr
+                            ? '✅ नकाशावरून माहिती घेतली'
+                            : '✅ Location and Area mapped successfully',
+                        style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                     const SizedBox(height: 14),
 
                     // Area & Survey Number Row

@@ -19,6 +19,12 @@ class FarmModel {
   final bool isActive;
   final bool isPrimary;
   final String? notes;
+  final String? polygonGeojson;
+  final double? areaSqm;
+  final double? areaHectares;
+  final double? perimeterMeters;
+  final double? lengthMeters;
+  final double? widthMeters;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -43,6 +49,12 @@ class FarmModel {
     this.isActive = true,
     this.isPrimary = false,
     this.notes,
+    this.polygonGeojson,
+    this.areaSqm,
+    this.areaHectares,
+    this.perimeterMeters,
+    this.lengthMeters,
+    this.widthMeters,
     this.createdAt,
     this.updatedAt,
   });
@@ -69,6 +81,12 @@ class FarmModel {
       isActive: json['is_active'] as bool? ?? true,
       isPrimary: json['is_primary'] as bool? ?? false,
       notes: json['notes'] as String?,
+      polygonGeojson: json['polygon_geojson'] as String?,
+      areaSqm: (json['area_sqm'] as num?)?.toDouble(),
+      areaHectares: (json['area_hectares'] as num?)?.toDouble(),
+      perimeterMeters: (json['perimeter_meters'] as num?)?.toDouble(),
+      lengthMeters: (json['length_meters'] as num?)?.toDouble(),
+      widthMeters: (json['width_meters'] as num?)?.toDouble(),
       createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'] as String) : null,
       updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'] as String) : null,
     );
@@ -96,6 +114,12 @@ class FarmModel {
       'is_active': isActive,
       'is_primary': isPrimary,
       'notes': notes,
+      'polygon_geojson': polygonGeojson,
+      'area_sqm': areaSqm,
+      'area_hectares': areaHectares,
+      'perimeter_meters': perimeterMeters,
+      'length_meters': lengthMeters,
+      'width_meters': widthMeters,
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
     };
@@ -122,6 +146,12 @@ class FarmModel {
     bool? isActive,
     bool? isPrimary,
     String? notes,
+    String? polygonGeojson,
+    double? areaSqm,
+    double? areaHectares,
+    double? perimeterMeters,
+    double? lengthMeters,
+    double? widthMeters,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -146,6 +176,12 @@ class FarmModel {
       isActive: isActive ?? this.isActive,
       isPrimary: isPrimary ?? this.isPrimary,
       notes: notes ?? this.notes,
+      polygonGeojson: polygonGeojson ?? this.polygonGeojson,
+      areaSqm: areaSqm ?? this.areaSqm,
+      areaHectares: areaHectares ?? this.areaHectares,
+      perimeterMeters: perimeterMeters ?? this.perimeterMeters,
+      lengthMeters: lengthMeters ?? this.lengthMeters,
+      widthMeters: widthMeters ?? this.widthMeters,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

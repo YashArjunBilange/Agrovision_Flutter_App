@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../domain/farm_model.dart';
 import '../providers/farm_provider.dart';
 import 'add_edit_farm_dialog.dart';
+import '../../satellite/presentation/satellite_view_screen.dart';
 
 class FarmScreen extends ConsumerWidget {
   const FarmScreen({super.key});
@@ -284,6 +285,13 @@ class FarmScreen extends ConsumerWidget {
                     onSelected: (val) {
                       if (val == 'edit') {
                         AddEditFarmDialog.show(context, farmToEdit: farm);
+                      } else if (val == 'satellite') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SatelliteViewScreen(farmId: farm.id),
+                          ),
+                        );
                       } else if (val == 'delete') {
                         _showDeleteConfirm(context, ref, farm, isMr);
                       }
@@ -296,6 +304,16 @@ class FarmScreen extends ConsumerWidget {
                             const Icon(Icons.edit_outlined, size: 18),
                             const SizedBox(width: 8),
                             Text(isMr ? 'संपादित करा' : 'Edit'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'satellite',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.satellite_alt_outlined, size: 18),
+                            const SizedBox(width: 8),
+                            Text(isMr ? 'उपग्रह प्रतिमा' : 'Satellite View'),
                           ],
                         ),
                       ),

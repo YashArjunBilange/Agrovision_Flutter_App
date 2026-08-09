@@ -4,6 +4,7 @@ from app.models.farm import Farm
 from app.models.scan import ScanHistory
 from app.models.crop_cycle import CropCycle, CropTask
 from app.models.finance import FarmTransaction
+from app.models.satellite import SatelliteObservation
 
 __all__ = [
     "Base",
@@ -14,4 +15,5 @@ __all__ = [
     "CropCycle",
     "CropTask",
     "FarmTransaction",
+    "SatelliteObservation",
 ]

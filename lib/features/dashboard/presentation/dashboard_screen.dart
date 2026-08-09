@@ -64,6 +64,21 @@ class DashboardScreen extends ConsumerWidget {
                             tooltip: isMr ? 'सूचना' : 'Notifications',
                             onPressed: () => context.push('/more/notifications'),
                           ),
+                          // Theme Toggle
+                          IconButton(
+                            icon: Icon(
+                              ref.watch(themeModeProvider) == ThemeMode.dark 
+                                ? Icons.light_mode 
+                                : Icons.dark_mode, 
+                              color: AppColors.primaryGreen,
+                            ),
+                            tooltip: isMr ? 'थीम बदला' : 'Toggle Theme',
+                            onPressed: () {
+                              final current = ref.read(themeModeProvider);
+                              ref.read(themeModeProvider.notifier).state = 
+                                current == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                            },
+                          ),
                           // Language Switcher
                           ActionChip(
                             avatar: const Icon(Icons.language, size: 16, color: AppColors.primaryGreen),

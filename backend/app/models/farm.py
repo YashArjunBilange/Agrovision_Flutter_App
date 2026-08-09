@@ -20,6 +20,14 @@ class Farm(Base):
     pincode = Column(String(10), nullable=True)
     survey_number = Column(String(50), nullable=True)  # e.g. Gat / Survey No.
 
+    # GeoJSON and Calculated Dimensions
+    polygon_geojson = Column(Text, nullable=True)
+    area_sqm = Column(Float, nullable=True)
+    area_hectares = Column(Float, nullable=True)
+    perimeter_meters = Column(Float, nullable=True)
+    length_meters = Column(Float, nullable=True)
+    width_meters = Column(Float, nullable=True)
+
     # Soil Properties
     soil_type = Column(String(100), nullable=True)  # Black Cotton, Red Loam, Sandy Loam, Clay, Alluvial
     soil_ph = Column(Float, nullable=True)
